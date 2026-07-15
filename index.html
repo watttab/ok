@@ -268,7 +268,7 @@ body {
       <div class="result-card">
         <div class="label">ระยะเวลาเดินทาง</div>
         <div class="value"><span id="travelDays">0</span></div>
-        <div class="unit">วัน <span id="travelHours">0</span> ชั่วโมง</div>
+        <div class="unit"><span id="travelHours">0</span> ชั่วโมง <span id="travelMinutes">0</span> นาที</div>
       </div>
       <div class="result-card highlight">
         <div class="label">รวมสิทธิ์ในการเบิก</div>
@@ -285,7 +285,7 @@ body {
     <div id="summaryText" style="margin-top:18px;padding:16px 20px;background:#1a1a1a;border-radius:10px;border:1px solid #2a2a2a;display:grid;gap:10px">
       <div style="display:flex;justify-content:space-between;align-items:center;font-size:15px">
         <span style="color:#a0a0a0">ระยะเดินทางรวม</span>
-        <span style="color:#fff;font-weight:600"><span id="sTotalDays">0</span> วัน</span>
+        <span style="color:#fff;font-weight:600"><span id="sTotalDays">0</span> วัน <span id="sTotalHours">0</span> ชม. <span id="sTotalMinutes">0</span> น.</span>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;font-size:15px">
         <span style="color:#a0a0a0">รวมสิทธิ์ในการเบิกเบี้ยเลี้ยงเดินทาง</span>
@@ -379,18 +379,25 @@ function calculate() {
   if (eligibleDays < 0) eligibleDays = 0
 
   const totalAllowance = eligibleDays * rate
-  const hours = Math.round(fractional * 24)
+  const totalHrsDec = fractional * 24
+  const hrs = Math.floor(totalHrsDec)
+  const mins = Math.round((totalHrsDec - hrs) * 60)
 
   const displayDays = wholeDays >= 0 ? wholeDays : 0
+  const displayHrs = hrs >= 0 ? hrs : 0
+  const displayMins = mins >= 0 ? mins : 0
   const displayEligible = eligibleDays >= 0 ? eligibleDays : 0
   const displayTotal = totalAllowance >= 0 ? totalAllowance.toLocaleString() : 0
 
   document.getElementById('travelDays').textContent = displayDays
-  document.getElementById('travelHours').textContent = hours >= 0 ? hours : 0
+  document.getElementById('travelHours').textContent = displayHrs
+  document.getElementById('travelMinutes').textContent = displayMins
   document.getElementById('eligibleDays').textContent = displayEligible
   document.getElementById('totalAllowance').textContent = displayTotal
 
   document.getElementById('sTotalDays').textContent = displayDays
+  document.getElementById('sTotalHours').textContent = displayHrs
+  document.getElementById('sTotalMinutes').textContent = displayMins
   document.getElementById('sEligibleDays').textContent = displayEligible
   document.getElementById('sTotalAllowance').textContent = displayTotal
 
