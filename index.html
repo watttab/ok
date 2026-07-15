@@ -17,10 +17,10 @@ body {
 /* Header */
 .header { display: flex; align-items: center; gap: 14px; margin-bottom: 40px; }
 .header-logo {
-  width: 38px; height: 38px; border-radius: 10px;
+  width: 42px; height: 42px; border-radius: 12px;
   background: linear-gradient(135deg, #dc2626, #991b1b);
   display: flex; align-items: center; justify-content: center;
-  font-weight: 800; font-size: 18px; color: #fff; flex-shrink: 0;
+  font-weight: 800; font-size: 20px; color: #fff; flex-shrink: 0;
 }
 .header h1 { font-size: 20px; font-weight: 600; letter-spacing: -0.3px; }
 .header h1 span { color: #dc2626; }
@@ -68,19 +68,20 @@ body {
 .form-grid.col-3 { grid-template-columns: 1fr 1fr 1fr; }
 .form-group { display: flex; flex-direction: column; gap: 5px; }
 .form-group label { font-size: 12px; font-weight: 500; color: #6b6b6b; text-transform: uppercase; letter-spacing: 0.3px; }
-.form-group input {
+.form-group input, .form-group select {
   padding: 10px 14px; border-radius: 10px; border: 1px solid #2a2a2a;
   background: #1a1a1a; color: #fff; font-size: 15px;
   transition: border-color .25s, box-shadow .25s;
   font-family: inherit;
 }
+.form-group select { cursor: pointer; appearance: auto; }
 .form-group input::placeholder { color: #4a4a4a; }
-.form-group input:focus { outline: none; border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,.15); }
+.form-group input:focus, .form-group select:focus { outline: none; border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,.15); }
 .time-row { display: flex; gap: 6px; align-items: center; }
-.time-row input { text-align: center; }
+.time-row input, .time-row select { text-align: center; }
 .time-row span { color: #4a4a4a; font-weight: 300; }
 
-/* Label row (Departure / Return) */
+/* Label row */
 .label-row { font-size: 13px; font-weight: 500; color: #dc2626; padding-top: 8px; }
 
 /* Results */
@@ -100,6 +101,15 @@ body {
 .borrow-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .borrow-grid .result-card { background: #1f0f0a; border-color: #3a1a1a; }
 .borrow-grid .result-card .value { color: #f87171; }
+
+/* Info link */
+.info-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: #6b6b6b; font-size: 13px; text-decoration: none;
+  padding: 6px 12px; border-radius: 8px; border: 1px solid #2a2a2a;
+  transition: all .25s; margin-top: 12px;
+}
+.info-link:hover { border-color: #dc2626; color: #dc2626; }
 
 /* Button */
 .calc-btn {
@@ -132,7 +142,6 @@ body {
   .card { padding: 18px; }
 }
 
-/* Smooth result updates */
 .result-card .value, .result-card .unit { transition: opacity .3s; }
 </style>
 </head>
@@ -140,8 +149,8 @@ body {
 <div class="container">
 
   <div class="header">
-    <div class="header-logo">BK</div>
-    <h1><span>เบี้ยเลี้ยง</span> calculator<span class="cursor"></span></h1>
+    <div class="header-logo">GO</div>
+    <h1><span>ระบบคำนวณเบี้ยเลี้ยง</span> เดินทางไปราชการ<span class="cursor"></span></h1>
   </div>
 
   <!-- Config -->
@@ -169,25 +178,6 @@ body {
     </div>
   </div>
 
-  <!-- Personal Info -->
-  <div class="card">
-    <div class="card-header"><span class="dot"></span>ข้อมูลส่วนบุคคล</div>
-    <div class="form-grid">
-      <div class="form-group">
-        <label>ชื่อ-สกุล</label>
-        <input type="text" id="fullName" placeholder="ชุตินันท์ แดงจีน">
-      </div>
-      <div class="form-group">
-        <label>ตำแหน่ง</label>
-        <input type="text" id="position" placeholder="นักจัดการงานทั่วไป">
-      </div>
-      <div class="form-group">
-        <label>กลุ่มงาน / สังกัด</label>
-        <input type="text" id="department" placeholder="ฝ่ายบริหารทั่วไป">
-      </div>
-    </div>
-  </div>
-
   <!-- Travel Info -->
   <div class="card">
     <div class="card-header"><span class="dot"></span>ข้อมูลการเดินทาง</div>
@@ -195,21 +185,36 @@ body {
     <div class="form-grid col-3" style="margin-bottom:14px">
       <div class="label-row">→ วันเดินทางไป</div>
       <div class="form-group">
-        <label>วัน เดือน ปี พ.ศ.</label>
+        <label>วันที่</label>
         <div class="time-row">
           <input type="number" id="depDay" placeholder="วัน" min="1" max="31" style="width:56px">
           <span>/</span>
-          <input type="number" id="depMonth" placeholder="เดือน" min="1" max="12" style="width:56px">
+          <select id="depMonth" style="width:90px">
+            <option value="1">ม.ค.</option>
+            <option value="2">ก.พ.</option>
+            <option value="3">มี.ค.</option>
+            <option value="4">เม.ย.</option>
+            <option value="5">พ.ค.</option>
+            <option value="6">มิ.ย.</option>
+            <option value="7">ก.ค.</option>
+            <option value="8">ส.ค.</option>
+            <option value="9">ก.ย.</option>
+            <option value="10">ต.ค.</option>
+            <option value="11">พ.ย.</option>
+            <option value="12">ธ.ค.</option>
+          </select>
           <span>/</span>
-          <input type="number" id="depYear" placeholder="ปี" min="2563" style="width:76px">
+          <select id="depYear" style="width:90px">
+          </select>
         </div>
       </div>
       <div class="form-group">
-        <label>เวลา (น.)</label>
+        <label>เวลาออกเดินทาง</label>
         <div class="time-row">
-          <input type="number" id="depHour" placeholder="ชม." min="0" max="23" style="width:64px">
+          <input type="number" id="depHour" placeholder="07" min="0" max="23" style="width:64px">
           <span>:</span>
-          <input type="number" id="depMin" placeholder="นาที" min="0" max="59" style="width:64px">
+          <input type="number" id="depMin" placeholder="00" min="0" max="59" style="width:64px">
+          <span style="color:#4a4a4a;font-size:12px">น.</span>
         </div>
       </div>
     </div>
@@ -217,22 +222,43 @@ body {
     <div class="form-grid col-3">
       <div class="label-row">← วันเดินทางกลับ</div>
       <div class="form-group">
+        <label>วันที่</label>
         <div class="time-row">
           <input type="number" id="retDay" placeholder="วัน" min="1" max="31" style="width:56px">
           <span>/</span>
-          <input type="number" id="retMonth" placeholder="เดือน" min="1" max="12" style="width:56px">
+          <select id="retMonth" style="width:90px">
+            <option value="1">ม.ค.</option>
+            <option value="2">ก.พ.</option>
+            <option value="3">มี.ค.</option>
+            <option value="4">เม.ย.</option>
+            <option value="5">พ.ค.</option>
+            <option value="6">มิ.ย.</option>
+            <option value="7">ก.ค.</option>
+            <option value="8">ส.ค.</option>
+            <option value="9">ก.ย.</option>
+            <option value="10">ต.ค.</option>
+            <option value="11">พ.ย.</option>
+            <option value="12">ธ.ค.</option>
+          </select>
           <span>/</span>
-          <input type="number" id="retYear" placeholder="ปี" min="2563" style="width:76px">
+          <select id="retYear" style="width:90px">
+          </select>
         </div>
       </div>
       <div class="form-group">
+        <label>กลับถึงจุดหมายเวลา</label>
         <div class="time-row">
-          <input type="number" id="retHour" placeholder="ชม." min="0" max="23" style="width:64px">
+          <input type="number" id="retHour" placeholder="21" min="0" max="23" style="width:64px">
           <span>:</span>
-          <input type="number" id="retMin" placeholder="นาที" min="0" max="59" style="width:64px">
+          <input type="number" id="retMin" placeholder="30" min="0" max="59" style="width:64px">
+          <span style="color:#4a4a4a;font-size:12px">น.</span>
         </div>
       </div>
     </div>
+
+    <a class="info-link" href="https://ocs.msu.ac.th/ocs_new/images/2567/17072024_01.pdf" target="_blank">
+      📋 ดูระเบียบกระทรวงการคลังว่าด้วยเบี้ยเลี้ยงเดินทาง
+    </a>
   </div>
 
   <!-- Results -->
@@ -287,10 +313,20 @@ body {
     </button>
   </div>
 
-  <div class="footer">BK · ระบบคำนวณเบี้ยเลี้ยงเดินทางไปราชการ</div>
+  <div class="footer">GO · ระบบคำนวณเบี้ยเลี้ยงเดินทางไปราชการ</div>
 </div>
 
 <script>
+for (const id of ['depYear', 'retYear']) {
+  const sel = document.getElementById(id)
+  for (let y = 2569; y <= 2599; y++) {
+    const opt = document.createElement('option')
+    opt.value = y
+    opt.textContent = y
+    sel.appendChild(opt)
+  }
+}
+
 function calculate() {
   const rate = parseInt(document.getElementById('rate').value)
   const accommodation = document.getElementById('accommodation').value
