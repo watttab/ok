@@ -282,6 +282,21 @@ body {
       </div>
     </div>
 
+    <div id="summaryText" style="margin-top:18px;padding:16px 20px;background:#1a1a1a;border-radius:10px;border:1px solid #2a2a2a;display:grid;gap:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:15px">
+        <span style="color:#a0a0a0">ระยะเดินทางรวม</span>
+        <span style="color:#fff;font-weight:600"><span id="sTotalDays">0</span> วัน</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:15px">
+        <span style="color:#a0a0a0">รวมสิทธิ์ในการเบิกเบี้ยเลี้ยงเดินทาง</span>
+        <span style="color:#dc2626;font-weight:700"><span id="sEligibleDays">0</span> วัน</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:15px">
+        <span style="color:#a0a0a0">รวมค่าเบี้ยเลี้ยงในการเดินทาง</span>
+        <span style="color:#dc2626;font-weight:700"><span id="sTotalAllowance">0</span> บาท</span>
+      </div>
+    </div>
+
     <div id="borrowSection" class="borrow-section hidden">
       <div class="card-header" style="margin-bottom:14px"><span class="dot"></span>การยืมเงินทดรองเดินทาง</div>
       <div class="borrow-grid">
@@ -366,10 +381,18 @@ function calculate() {
   const totalAllowance = eligibleDays * rate
   const hours = Math.round(fractional * 24)
 
-  document.getElementById('travelDays').textContent = wholeDays >= 0 ? wholeDays : 0
+  const displayDays = wholeDays >= 0 ? wholeDays : 0
+  const displayEligible = eligibleDays >= 0 ? eligibleDays : 0
+  const displayTotal = totalAllowance >= 0 ? totalAllowance.toLocaleString() : 0
+
+  document.getElementById('travelDays').textContent = displayDays
   document.getElementById('travelHours').textContent = hours >= 0 ? hours : 0
-  document.getElementById('eligibleDays').textContent = eligibleDays >= 0 ? eligibleDays : 0
-  document.getElementById('totalAllowance').textContent = totalAllowance >= 0 ? totalAllowance.toLocaleString() : 0
+  document.getElementById('eligibleDays').textContent = displayEligible
+  document.getElementById('totalAllowance').textContent = displayTotal
+
+  document.getElementById('sTotalDays').textContent = displayDays
+  document.getElementById('sEligibleDays').textContent = displayEligible
+  document.getElementById('sTotalAllowance').textContent = displayTotal
 
   const bs = document.getElementById('borrowSection')
   bs.classList.toggle('hidden', !isBorrowing)
