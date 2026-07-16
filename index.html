@@ -336,6 +336,35 @@ body {
       </div>
     </div>
 
+    <div style="margin-top:18px;padding-top:16px;border-top:1px solid #222">
+      <div style="font-size:12px;font-weight:500;color:#6b6b6b;text-transform:uppercase;letter-spacing:0.3px;margin-bottom:12px">🚗 ค่าพาหนะและอื่นๆ</div>
+      <div class="form-grid" style="grid-template-columns:1fr 1fr">
+        <div class="form-group">
+          <label>🚌 ค่าพาหนะรับจ้าง/ประจำทาง</label>
+          <input type="number" id="transportCost" placeholder="บาท" min="0">
+        </div>
+        <div class="form-group">
+          <label>🚗 รถยนต์ส่วนตัว</label>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <select id="personalCar" style="padding:8px 12px;border-radius:8px;border:1px solid #2a2a2a;background:#1a1a1a;color:#fff;font-size:13px;outline:none;font-family:inherit">
+              <option value="no">ไม่ใช้</option>
+              <option value="yes">ใช้</option>
+            </select>
+            <div id="carKmRow" style="display:none;align-items:center;gap:6px">
+              <input type="number" id="carKm" placeholder="กม." min="0" style="width:72px;padding:8px 10px;border-radius:8px;border:1px solid #2a2a2a;background:#1a1a1a;color:#fff;font-size:13px;outline:none;font-family:inherit;text-align:center">
+              <span style="color:#6b6b6b;font-size:12px">× 4 =</span>
+              <span style="color:#f97316;font-weight:600;font-size:14px" id="carAmount">0</span>
+              <span style="color:#6b6b6b;font-size:12px">บาท</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:10px">
+        <label>📋 ค่าใช้จ่ายอื่นๆ (ค่าลงทะเบียน ทางด่วน ฯลฯ)</label>
+        <input type="number" id="otherCost" placeholder="บาท" min="0">
+      </div>
+    </div>
+
     <a class="info-link" href="https://www.dmr.go.th/wp-content/uploads/2023/03/ระเบียบกระทรวงการคลังว่าด้วยการเบิกค่าใช้จ่ายในการเดินทางไปราชการ-พ.ศ.-2565-ฉบับที่-3.pdf" target="_blank">
       📋 ดูระเบียบกระทรวงการคลังว่าด้วยเบี้ยเลี้ยงเดินทาง
     </a>
@@ -393,12 +422,20 @@ body {
         <span style="color:#a0a0a0">🏨 ค่าที่พัก</span>
         <span style="color:#fff;font-weight:600"><span id="sAccommodation">0</span> บาท</span>
       </div>
+      <div id="sTransportRow" style="display:none;justify-content:space-between;align-items:center;font-size:14px">
+        <span style="color:#a0a0a0">🚌 ค่าพาหนะ</span>
+        <span style="color:#fff;font-weight:600"><span id="sTransport">0</span> บาท</span>
+      </div>
+      <div id="sOtherRow" style="display:none;justify-content:space-between;align-items:center;font-size:14px">
+        <span style="color:#a0a0a0">📋 ค่าใช้จ่ายอื่นๆ</span>
+        <span style="color:#fff;font-weight:600"><span id="sOther">0</span> บาท</span>
+      </div>
       <div id="sNetRow" style="display:none;justify-content:space-between;align-items:center;font-size:15px;border-top:1px solid #2a2a2a;padding-top:8px">
         <span style="color:#a0a0a0">รวมสุทธิหลังหัก</span>
         <span style="color:#dc2626;font-weight:700"><span id="sNetAllowance">0</span> บาท</span>
       </div>
       <div id="sGrandTotalRow" style="display:none;justify-content:space-between;align-items:center;font-size:16px;border-top:2px solid #dc2626;padding-top:10px;margin-top:4px">
-        <span style="color:#fff;font-weight:700">รวมทั้งสิ้น (เบี้ยเลี้ยง + ที่พัก)</span>
+        <span style="color:#fff;font-weight:700">รวมทั้งสิ้น</span>
         <span style="color:#dc2626;font-weight:800;font-size:18px"><span id="sGrandTotal">0</span> บาท</span>
       </div>
     </div>
@@ -576,17 +613,32 @@ function calculate() {
 
   const accommodationCost = parseFloat(document.getElementById('accommodationCost').value) || 0
   const hasAccommodation = accommodation === 'yes' && accommodationCost > 0
-  const accEl = document.getElementById('accommodationResult')
-  const sAccRow = document.getElementById('sAccommodationRow')
-  const sGrandRow = document.getElementById('sGrandTotalRow')
-  accEl.style.display = hasAccommodation ? 'flex' : 'none'
-  sAccRow.style.display = hasAccommodation ? 'flex' : 'none'
-  sGrandRow.style.display = hasAccommodation ? 'flex' : 'none'
+  document.getElementById('accommodationResult').style.display = hasAccommodation ? 'flex' : 'none'
+  document.getElementById('sAccommodationRow').style.display = hasAccommodation ? 'flex' : 'none'
   if (hasAccommodation) {
-    const accDisplay = accommodationCost.toLocaleString()
-    document.getElementById('accommodationAmount').textContent = accDisplay
-    document.getElementById('sAccommodation').textContent = accDisplay
-    const grandTotal = netAllowance + accommodationCost
+    const d = accommodationCost.toLocaleString()
+    document.getElementById('accommodationAmount').textContent = d
+    document.getElementById('sAccommodation').textContent = d
+  }
+
+  const transportCost = parseFloat(document.getElementById('transportCost').value) || 0
+  const carKm = parseFloat(document.getElementById('carKm').value) || 0
+  const carCost = carKm * 4
+  const totalTransport = transportCost + carCost
+  const hasTransport = totalTransport > 0
+  document.getElementById('sTransportRow').style.display = hasTransport ? 'flex' : 'none'
+  if (hasTransport) document.getElementById('sTransport').textContent = totalTransport.toLocaleString()
+
+  const otherCost = parseFloat(document.getElementById('otherCost').value) || 0
+  const hasOther = otherCost > 0
+  document.getElementById('sOtherRow').style.display = hasOther ? 'flex' : 'none'
+  if (hasOther) document.getElementById('sOther').textContent = otherCost.toLocaleString()
+
+  const hasExtra = hasAccommodation || hasTransport || hasOther
+  const sGrandRow = document.getElementById('sGrandTotalRow')
+  sGrandRow.style.display = hasExtra ? 'flex' : 'none'
+  if (hasExtra) {
+    const grandTotal = netAllowance + accommodationCost + totalTransport + otherCost
     document.getElementById('sGrandTotal').textContent = grandTotal.toLocaleString()
   }
 
@@ -608,6 +660,16 @@ document.getElementById('accommodation').addEventListener('change', function() {
   const isYes = this.value === 'yes'
   document.getElementById('accommodationCostRow').style.display = isYes ? 'grid' : 'none'
   if (!isYes) document.getElementById('accommodationCost').value = ''
+})
+
+document.getElementById('personalCar').addEventListener('change', function() {
+  const isYes = this.value === 'yes'
+  document.getElementById('carKmRow').style.display = isYes ? 'flex' : 'none'
+  if (!isYes) { document.getElementById('carKm').value = ''; document.getElementById('carAmount').textContent = '0' }
+})
+document.getElementById('carKm').addEventListener('input', function() {
+  const km = parseFloat(this.value) || 0
+  document.getElementById('carAmount').textContent = (km * 4).toLocaleString()
 })
 
 document.getElementById('borrowing').addEventListener('change', function() {
