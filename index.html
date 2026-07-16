@@ -329,6 +329,13 @@ body {
       </div>
     </div>
 
+    <div id="accommodationCostRow" class="form-grid" style="display:none;margin-top:16px;grid-template-columns:1fr">
+      <div class="form-group">
+        <label>ค่าที่พักจ่ายจริง (รวม)</label>
+        <input type="number" id="accommodationCost" placeholder="บาท" min="0">
+      </div>
+    </div>
+
     <a class="info-link" href="https://www.dmr.go.th/wp-content/uploads/2023/03/ระเบียบกระทรวงการคลังว่าด้วยการเบิกค่าใช้จ่ายในการเดินทางไปราชการ-พ.ศ.-2565-ฉบับที่-3.pdf" target="_blank">
       📋 ดูระเบียบกระทรวงการคลังว่าด้วยเบี้ยเลี้ยงเดินทาง
     </a>
@@ -355,6 +362,11 @@ body {
       </div>
     </div>
 
+    <div id="accommodationResult" style="display:none;margin-top:12px;padding:12px 16px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;justify-content:space-between;align-items:center;font-size:14px">
+      <span style="color:#a0a0a0">🏨 ค่าที่พัก</span>
+      <span style="color:#fff;font-weight:700"><span id="accommodationAmount">0</span> บาท</span>
+    </div>
+
     <div id="mealDeduction" style="display:none;margin-top:12px;padding:12px 16px;background:#1f0f0a;border:1px solid #3a1a1a;border-radius:10px;justify-content:space-between;align-items:center;font-size:14px">
       <span style="color:#f87171">⛔ หักค่าอาหารที่โครงการจัดให้</span>
       <span style="color:#f87171;font-weight:700"><span id="mealDeductionAmount">0</span> บาท</span>
@@ -377,9 +389,17 @@ body {
         <span style="color:#f87171">หักค่าอาหารที่โครงการจัด</span>
         <span style="color:#f87171;font-weight:600">-<span id="sMealDeduction">0</span> บาท</span>
       </div>
+      <div id="sAccommodationRow" style="display:none;justify-content:space-between;align-items:center;font-size:14px">
+        <span style="color:#a0a0a0">🏨 ค่าที่พัก</span>
+        <span style="color:#fff;font-weight:600"><span id="sAccommodation">0</span> บาท</span>
+      </div>
       <div id="sNetRow" style="display:none;justify-content:space-between;align-items:center;font-size:15px;border-top:1px solid #2a2a2a;padding-top:8px">
         <span style="color:#a0a0a0">รวมสุทธิหลังหัก</span>
         <span style="color:#dc2626;font-weight:700"><span id="sNetAllowance">0</span> บาท</span>
+      </div>
+      <div id="sGrandTotalRow" style="display:none;justify-content:space-between;align-items:center;font-size:16px;border-top:2px solid #dc2626;padding-top:10px;margin-top:4px">
+        <span style="color:#fff;font-weight:700">รวมทั้งสิ้น (เบี้ยเลี้ยง + ที่พัก)</span>
+        <span style="color:#dc2626;font-weight:800;font-size:18px"><span id="sGrandTotal">0</span> บาท</span>
       </div>
     </div>
 
@@ -554,6 +574,22 @@ function calculate() {
     document.getElementById('sNetAllowance').textContent = netAllowance.toLocaleString()
   }
 
+  const accommodationCost = parseFloat(document.getElementById('accommodationCost').value) || 0
+  const hasAccommodation = accommodation === 'yes' && accommodationCost > 0
+  const accEl = document.getElementById('accommodationResult')
+  const sAccRow = document.getElementById('sAccommodationRow')
+  const sGrandRow = document.getElementById('sGrandTotalRow')
+  accEl.style.display = hasAccommodation ? 'flex' : 'none'
+  sAccRow.style.display = hasAccommodation ? 'flex' : 'none'
+  sGrandRow.style.display = hasAccommodation ? 'flex' : 'none'
+  if (hasAccommodation) {
+    const accDisplay = accommodationCost.toLocaleString()
+    document.getElementById('accommodationAmount').textContent = accDisplay
+    document.getElementById('sAccommodation').textContent = accDisplay
+    const grandTotal = netAllowance + accommodationCost
+    document.getElementById('sGrandTotal').textContent = grandTotal.toLocaleString()
+  }
+
   const bs = document.getElementById('borrowSection')
   bs.classList.toggle('hidden', !isBorrowing)
 
@@ -567,6 +603,12 @@ function calculate() {
     document.getElementById('refundPercent').textContent = pct.toFixed(2)
   }
 }
+
+document.getElementById('accommodation').addEventListener('change', function() {
+  const isYes = this.value === 'yes'
+  document.getElementById('accommodationCostRow').style.display = isYes ? 'grid' : 'none'
+  if (!isYes) document.getElementById('accommodationCost').value = ''
+})
 
 document.getElementById('borrowing').addEventListener('change', function() {
   document.getElementById('borrowPill').classList.toggle('active', this.value === 'yes')
