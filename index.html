@@ -162,6 +162,7 @@ body {
 .modal-close { cursor: pointer; color: #6b6b6b; font-size: 20px; padding: 4px; }
 .modal-close:hover { color: #fff; }
 .modal-body { padding: 16px 20px 24px; font-size: 14px; line-height: 1.6; color: #c0c0c0; }
+.modal-overlay.hidden { display: none; }
 
 #mealDeduction { transition: all .3s; }
 </style>
@@ -312,7 +313,7 @@ body {
       </div>
     </div>
 
-    <div id="mealDeduction" class="hidden" style="margin-top:12px;padding:12px 16px;background:#1f0f0a;border:1px solid #3a1a1a;border-radius:10px;display:flex;justify-content:space-between;align-items:center;font-size:14px">
+    <div id="mealDeduction" style="display:none;margin-top:12px;padding:12px 16px;background:#1f0f0a;border:1px solid #3a1a1a;border-radius:10px;justify-content:space-between;align-items:center;font-size:14px">
       <span style="color:#f87171">⛔ หักค่าอาหารที่โครงการจัดให้</span>
       <span style="color:#f87171;font-weight:700"><span id="mealDeductionAmount">0</span> บาท</span>
     </div>
@@ -330,11 +331,11 @@ body {
         <span style="color:#a0a0a0">รวมค่าเบี้ยเลี้ยงในการเดินทาง</span>
         <span style="color:#dc2626;font-weight:700"><span id="sTotalAllowance">0</span> บาท</span>
       </div>
-      <div id="sMealRow" class="hidden" style="display:flex;justify-content:space-between;align-items:center;font-size:14px">
+      <div id="sMealRow" style="display:none;justify-content:space-between;align-items:center;font-size:14px">
         <span style="color:#f87171">หักค่าอาหารที่โครงการจัด</span>
         <span style="color:#f87171;font-weight:600">-<span id="sMealDeduction">0</span> บาท</span>
       </div>
-      <div id="sNetRow" class="hidden" style="display:flex;justify-content:space-between;align-items:center;font-size:15px;border-top:1px solid #2a2a2a;padding-top:8px">
+      <div id="sNetRow" style="display:none;justify-content:space-between;align-items:center;font-size:15px;border-top:1px solid #2a2a2a;padding-top:8px">
         <span style="color:#a0a0a0">รวมสุทธิหลังหัก</span>
         <span style="color:#dc2626;font-weight:700"><span id="sNetAllowance">0</span> บาท</span>
       </div>
@@ -483,9 +484,9 @@ function calculate() {
   const dedEl = document.getElementById('mealDeduction')
   const sMealRow = document.getElementById('sMealRow')
   const sNetRow = document.getElementById('sNetRow')
-  dedEl.classList.toggle('hidden', !hasMeals)
-  sMealRow.classList.toggle('hidden', !hasMeals)
-  sNetRow.classList.toggle('hidden', !hasMeals)
+  dedEl.style.display = hasMeals ? 'flex' : 'none'
+  sMealRow.style.display = hasMeals ? 'flex' : 'none'
+  sNetRow.style.display = hasMeals ? 'flex' : 'none'
 
   if (hasMeals) {
     document.getElementById('mealDeductionAmount').textContent = totalDeduction.toLocaleString()
