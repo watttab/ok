@@ -102,6 +102,45 @@ body {
 .borrow-grid .result-card { background: #1f0f0a; border-color: #3a1a1a; }
 .borrow-grid .result-card .value { color: #f87171; }
 
+/* Multi-segment (orange theme) */
+.card-orange { border-color: #3a1f0a; }
+.card-orange:focus-within { border-color: #ea580c; }
+.card-orange .card-header { color: #f97316; }
+.card-orange .card-header .dot { background: #f97316; }
+.segment-card {
+  background: #120c08; border: 1px solid #2a1a0a;
+  border-radius: 12px; padding: 18px; margin-bottom: 14px;
+}
+.segment-card:focus-within { border-color: #ea580c; }
+.segment-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 14px;
+}
+.segment-title { font-size: 13px; font-weight: 600; color: #f97316; }
+.segment-delete {
+  background: none; border: none; color: #6b6b6b; cursor: pointer;
+  font-size: 16px; padding: 4px 8px; border-radius: 6px; transition: all .2s;
+}
+.segment-delete:hover { background: #2a0a0a; color: #f87171; }
+.segment-result {
+  margin-top: 12px; padding: 10px 14px;
+  background: #0d0d0d; border-radius: 8px;
+  display: grid; gap: 4px; font-size: 13px;
+}
+.segment-result .row { display: flex; justify-content: space-between; }
+.segment-result .lbl { color: #6b6b6b; }
+.segment-result .val { color: #f97316; font-weight: 600; }
+.btn-add-segment {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 12px;
+  background: transparent; border: 1px dashed #3a1f0a;
+  color: #f97316; font-size: 14px; font-weight: 500;
+  border-radius: 10px; cursor: pointer; transition: all .25s;
+  font-family: inherit;
+}
+.btn-add-segment:hover { border-color: #ea580c; background: rgba(234,88,12,.08); }
+.seg-empty { font-size: 13px; color: #4a4a4a; text-align: center; padding: 20px 0; }
+
 /* Info link */
 .info-link {
   display: inline-flex; align-items: center; gap: 6px;
@@ -377,6 +416,23 @@ body {
     </button>
   </div>
 
+  <!-- Multi-segment -->
+  <div class="card card-orange" id="multiSegment">
+    <div class="card-header"><span class="dot"></span>ส่วนเพิ่ม — ช่วงการเดินทางซ้อน</div>
+    <p style="font-size:13px;color:#6b6b6b;margin-bottom:16px;line-height:1.5">
+      สำหรับกรณีเดินทางต่อเนื่องหลายช่วง <strong style="color:#f97316">ต่างวัน ต่างเวลา</strong> แต่ละช่วงคำนวณแยกอิสระ
+    </p>
+    <div id="segmentsContainer"><p class="seg-empty">ยังไม่มีช่วงเพิ่มเติม</p></div>
+    <button class="btn-add-segment" onclick="addSegment()">+ เพิ่มช่วงการเดินทาง</button>
+    <div id="segmentsTotal" style="display:none;margin-top:16px;padding:14px;background:#0d0d0d;border-radius:10px;border:1px solid #2a1a0a">
+      <div style="font-size:13px;font-weight:600;color:#f97316;margin-bottom:8px">รวมทุกช่วง</div>
+      <div style="display:flex;justify-content:space-between;font-size:13px">
+        <span style="color:#6b6b6b">รวมสุทธิเบี้ยเลี้ยงทุกช่วง</span>
+        <span style="color:#f97316;font-weight:700" id="segTotalAllowance">0 บาท</span>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal -->
   <div id="mealModal" class="modal-overlay">
     <div class="modal">
@@ -537,6 +593,161 @@ mealInfoBtn.addEventListener('click', function() {
 })
 modalCloseBtn.addEventListener('click', function() {
   mealModal.classList.add('hidden')
+})
+
+/* ── Multi-segment ── */
+
+const monthsTH = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.']
+
+function segMonthOpts(sel) {
+  return monthsTH.map((m,i) => `<option value="${i+1}"${i+1===sel?' selected':''}>${m}</option>`).join('')
+}
+function segYearOpts(sel) {
+  let r='';for(let y=2569;y<=2599;y++)r+=`<option value="${y}"${y===sel?' selected':''}>${y}</option>`;return r
+}
+function segNow() {
+  const d=new Date();return{d:m=d.getMonth()+1,y:d.getFullYear()+543}
+}
+
+let segs=[]
+let segId=0
+
+function addSegment() {
+  const n=segNow()
+  segId++
+  segs.push({
+    id:segId,depDay:'',depMonth:n.d,depYear:n.y,depHour:'',depMin:'',
+    retDay:'',retMonth:n.d,retYear:n.y,retHour:'',retMin:'',
+    accommodation:'no',meals:0
+  })
+  renderSegs()
+}
+
+function rmSegment(id) {
+  segs=segs.filter(s=>s.id!==id)
+  renderSegs()
+}
+
+function calcSeg(s,r) {
+  const dep=new Date(parseInt(s.depYear)-543,parseInt(s.depMonth)-1,parseInt(s.depDay),parseInt(s.depHour)||0,parseInt(s.depMin)||0)
+  const ret=new Date(parseInt(s.retYear)-543,parseInt(s.retMonth)-1,parseInt(s.retDay),parseInt(s.retHour)||0,parseInt(s.retMin)||0)
+  const diffMs=ret-dep
+  if(diffMs<=0)return{days:0,eligibleDays:0,allowance:0,deduction:0,net:0}
+  const diffDays=diffMs/864e5,w=Math.floor(diffDays),f=diffDays-w
+  let e;if(f>.5)e=w+1;else if(f>.25)e=s.accommodation==='no'?w+.5:w;else e=w
+  if(e<0)e=0
+  const al=e*r,ml=parseInt(s.meals),dc=ml>0?Math.round(e*r/3)*ml:0
+  const tm=Math.round(f*24*60)
+  return{days:w,hours:Math.floor(tm/60),mins:tm%60,eligibleDays:e,allowance:al,deduction:dc,net:Math.max(0,al-dc)}
+}
+
+function segResultHTML(s,r) {
+  const c=calcSeg(s,r)
+  if(c.eligibleDays===0)return''
+  let h=`<div class="segment-result">`
+  h+=`<div class="row"><span class="lbl">ระยะเวลา</span><span class="val">${c.days} วัน ${c.hours} ชม. ${c.mins} น.</span></div>`
+  h+=`<div class="row"><span class="lbl">สิทธิ์เบิก</span><span class="val">${c.eligibleDays} วัน</span></div>`
+  h+=`<div class="row"><span class="lbl">ค่าเบี้ยเลี้ยง</span><span class="val">${c.allowance.toLocaleString()} บาท</span></div>`
+  if(c.deduction>0){
+    h+=`<div class="row"><span class="lbl">หักค่าอาหาร</span><span class="val" style="color:#f87171">-${c.deduction.toLocaleString()} บาท</span></div>`
+    h+=`<div class="row"><span class="lbl"><strong style="color:#fff">สุทธิ</strong></span><span class="val" style="color:#fff">${c.net.toLocaleString()} บาท</span></div>`
+  }
+  return h+'</div>'
+}
+
+function renderSegs() {
+  const c=document.getElementById('segmentsContainer')
+  const r=parseInt(document.getElementById('rate').value)
+  if(!segs.length){c.innerHTML='<p class="seg-empty">ยังไม่มีช่วงเพิ่มเติม</p>';return}
+  c.innerHTML=segs.map(s=>{
+    const idx=segs.indexOf(s)+1
+    return `<div class="segment-card" data-id="${s.id}">
+      <div class="segment-header">
+        <span class="segment-title">📍 ช่วงที่ ${idx}</span>
+        <button class="segment-delete" onclick="rmSegment(${s.id})">✕</button>
+      </div>
+      <div class="form-grid col-3" style="margin-bottom:12px">
+        <div class="label-row">→ วันเดินทางไป</div>
+        <div class="form-group">
+          <label>วันที่</label>
+          <div class="time-row">
+            <input type="number" class="si" data-id="${s.id}" data-f="depDay" value="${s.depDay}" placeholder="วัน" min="1" max="31" style="width:56px">
+            <span>/</span>
+            <select class="si" data-id="${s.id}" data-f="depMonth" style="width:90px">${segMonthOpts(parseInt(s.depMonth))}</select>
+            <span>/</span>
+            <select class="si" data-id="${s.id}" data-f="depYear" style="width:90px">${segYearOpts(parseInt(s.depYear))}</select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>เวลาออก</label>
+          <div class="time-row">
+            <input type="number" class="si" data-id="${s.id}" data-f="depHour" value="${s.depHour}" placeholder="07" min="0" max="23" style="width:64px">
+            <span>:</span>
+            <input type="number" class="si" data-id="${s.id}" data-f="depMin" value="${s.depMin}" placeholder="00" min="0" max="59" style="width:64px">
+            <span style="color:#4a4a4a;font-size:12px">น.</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-grid col-3" style="margin-bottom:12px">
+        <div class="label-row">← วันเดินทางกลับ</div>
+        <div class="form-group">
+          <label>วันที่</label>
+          <div class="time-row">
+            <input type="number" class="si" data-id="${s.id}" data-f="retDay" value="${s.retDay}" placeholder="วัน" min="1" max="31" style="width:56px">
+            <span>/</span>
+            <select class="si" data-id="${s.id}" data-f="retMonth" style="width:90px">${segMonthOpts(parseInt(s.retMonth))}</select>
+            <span>/</span>
+            <select class="si" data-id="${s.id}" data-f="retYear" style="width:90px">${segYearOpts(parseInt(s.retYear))}</select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>เวลากลับ</label>
+          <div class="time-row">
+            <input type="number" class="si" data-id="${s.id}" data-f="retHour" value="${s.retHour}" placeholder="21" min="0" max="23" style="width:64px">
+            <span>:</span>
+            <input type="number" class="si" data-id="${s.id}" data-f="retMin" value="${s.retMin}" placeholder="30" min="0" max="59" style="width:64px">
+            <span style="color:#4a4a4a;font-size:12px">น.</span>
+          </div>
+        </div>
+      </div>
+      <div class="config-row" style="margin-bottom:0">
+        <div class="pill active" style="font-size:12px"><span class="key">🏠</span> พักแรม
+          <select class="si" data-id="${s.id}" data-f="accommodation" style="font-size:12px">
+            <option value="no"${s.accommodation==='no'?' selected':''}>ไม่พักแรม</option>
+            <option value="yes"${s.accommodation==='yes'?' selected':''}>พักแรม</option>
+          </select>
+        </div>
+        <div class="pill" style="font-size:12px"><span class="key">🍽</span> อาหาร
+          <select class="si" data-id="${s.id}" data-f="meals" style="font-size:12px">
+            <option value="0"${s.meals===0?' selected':''}>ไม่จัด</option>
+            <option value="1"${s.meals===1?' selected':''}>1 มื้อ</option>
+            <option value="2"${s.meals===2?' selected':''}>2 มื้อ</option>
+            <option value="3"${s.meals===3?' selected':''}>3 มื้อ</option>
+          </select>
+        </div>
+      </div>
+      ${segResultHTML(s,r)}
+    </div>`
+  }).join('')
+  updateSegTotal()
+}
+
+function updateSegTotal() {
+  const r=parseInt(document.getElementById('rate').value)
+  let total=0,has=false
+  for(const s of segs){const c=calcSeg(s,r);if(c.eligibleDays>0){total+=c.net;has=true}}
+  const te=document.getElementById('segmentsTotal')
+  if(has){te.style.display='block';document.getElementById('segTotalAllowance').textContent=total.toLocaleString()+' บาท'}
+  else te.style.display='none'
+}
+
+document.addEventListener('input',function(e){
+  const el=e.target
+  if(el.classList.contains('si')){
+    const id=parseInt(el.dataset.id),f=el.dataset.f
+    const seg=segs.find(s=>s.id===id)
+    if(seg){seg[f]=el.value;renderSegs()}
+  }
 })
 </script>
 </body>
