@@ -203,7 +203,7 @@ body {
           <option value="2">2 มื้อ/วัน</option>
           <option value="3">3 มื้อ/วัน</option>
         </select>
-        <span id="mealInfoBtn" style="cursor:pointer;color:#6b6b6b;font-size:15px;transition:color .2s;margin-left:2px" onclick="showMealPopup()" title="ดูรายละเอียดการหักค่าเบี้ยเลี้ยง">ⓘ</span>
+        <span id="mealInfoBtn" style="cursor:pointer;color:#6b6b6b;font-size:15px;transition:color .2s;margin-left:2px" title="ดูรายละเอียดการหักค่าเบี้ยเลี้ยง">ⓘ</span>
       </div>
     </div>
   </div>
@@ -372,11 +372,11 @@ body {
   </div>
 
   <!-- Modal -->
-  <div id="mealModal" class="modal-overlay" onclick="if(event.target===this)closeMealPopup()">
+  <div id="mealModal" class="modal-overlay">
     <div class="modal">
       <div class="modal-header">
         <span>⚠️ ข้อควรระวัง — การหักค่าเบี้ยเลี้ยงเมื่อโครงการจัดอาหาร</span>
-        <span class="modal-close" onclick="closeMealPopup()">✕</span>
+        <span class="modal-close" id="modalCloseBtn">✕</span>
       </div>
       <div class="modal-body">
         <p>ตามระเบียบกระทรวงการคลังว่าด้วยค่าใช้จ่ายในการฝึกอบรม การจัดงาน และการประชุมระหว่างประเทศ พ.ศ. 2549 (ฉบับที่ 3) พ.ศ. 2555 <strong>ข้อ 18</strong></p>
@@ -507,16 +507,22 @@ function calculate() {
   }
 }
 
-function showMealPopup() {
-  document.getElementById('mealModal').classList.remove('hidden')
-}
-
-function closeMealPopup() {
-  document.getElementById('mealModal').classList.add('hidden')
-}
-
 document.getElementById('borrowing').addEventListener('change', function() {
   document.getElementById('borrowPill').classList.toggle('active', this.value === 'yes')
+})
+
+const mealModal = document.getElementById('mealModal')
+const mealInfoBtn = document.getElementById('mealInfoBtn')
+const modalCloseBtn = document.getElementById('modalCloseBtn')
+
+mealModal.addEventListener('click', function(e) {
+  if (e.target === this) this.classList.add('hidden')
+})
+mealInfoBtn.addEventListener('click', function() {
+  mealModal.classList.remove('hidden')
+})
+modalCloseBtn.addEventListener('click', function() {
+  mealModal.classList.add('hidden')
 })
 </script>
 </body>
