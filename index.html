@@ -197,14 +197,19 @@ body {
           <option value="yes">ยืม</option>
         </select>
       </div>
-      <div class="pill" id="mealPill"><span class="key">🍽</span> โครงการจัดอาหาร
-        <select id="meals">
-          <option value="0">ไม่จัด</option>
+      <div class="pill" id="mealPill"><span class="key">🍽</span> จัดอาหารตามกำหนดการ
+        <select id="mealToggle">
+          <option value="no">ไม่จัด</option>
+          <option value="yes">จัด</option>
+        </select>
+        <span id="mealInfoBtn" style="cursor:pointer;color:#6b6b6b;font-size:15px;transition:color .2s;margin-left:2px" title="ดูรายละเอียดการหักค่าเบี้ยเลี้ยง">ⓘ</span>
+      </div>
+      <div class="pill" id="mealCountPill" style="display:none"><span class="key">#</span> จำนวนมื้อ
+        <select id="mealCount">
           <option value="1">1 มื้อ/วัน</option>
           <option value="2">2 มื้อ/วัน</option>
           <option value="3">3 มื้อ/วัน</option>
         </select>
-        <span id="mealInfoBtn" style="cursor:pointer;color:#6b6b6b;font-size:15px;transition:color .2s;margin-left:2px" title="ดูรายละเอียดการหักค่าเบี้ยเลี้ยง">ⓘ</span>
       </div>
     </div>
   </div>
@@ -420,7 +425,8 @@ function calculate() {
   const rate = parseInt(document.getElementById('rate').value)
   const accommodation = document.getElementById('accommodation').value
   const isBorrowing = document.getElementById('borrowing').value === 'yes'
-  const meals = parseInt(document.getElementById('meals').value)
+  const mealToggle = document.getElementById('mealToggle').value
+  const meals = mealToggle === 'yes' ? parseInt(document.getElementById('mealCount').value) : 0
 
   const depDay = parseInt(document.getElementById('depDay').value)
   const depMonth = parseInt(document.getElementById('depMonth').value)
@@ -510,6 +516,13 @@ function calculate() {
 
 document.getElementById('borrowing').addEventListener('change', function() {
   document.getElementById('borrowPill').classList.toggle('active', this.value === 'yes')
+})
+
+document.getElementById('mealToggle').addEventListener('change', function() {
+  const isYes = this.value === 'yes'
+  document.getElementById('mealPill').classList.toggle('active', isYes)
+  const cp = document.getElementById('mealCountPill')
+  cp.style.display = isYes ? 'flex' : 'none'
 })
 
 const mealModal = document.getElementById('mealModal')
