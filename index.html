@@ -143,6 +143,27 @@ body {
 }
 
 .result-card .value, .result-card .unit { transition: opacity .3s; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.7);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; padding: 20px;
+}
+.modal {
+  background: #141414; border: 1px solid #333;
+  border-radius: 14px; max-width: 520px; width: 100%;
+  box-shadow: 0 20px 60px rgba(0,0,0,.5);
+}
+.modal-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 18px 20px 0; font-size: 15px; font-weight: 600; color: #f87171;
+}
+.modal-close { cursor: pointer; color: #6b6b6b; font-size: 20px; padding: 4px; }
+.modal-close:hover { color: #fff; }
+.modal-body { padding: 16px 20px 24px; font-size: 14px; line-height: 1.6; color: #c0c0c0; }
+
+#mealDeduction { transition: all .3s; }
 </style>
 </head>
 <body>
@@ -174,6 +195,15 @@ body {
           <option value="no">ไม่ยืม</option>
           <option value="yes">ยืม</option>
         </select>
+      </div>
+      <div class="pill" id="mealPill"><span class="key">🍽</span> โครงการจัดอาหาร
+        <select id="meals">
+          <option value="0">ไม่จัด</option>
+          <option value="1">1 มื้อ/วัน</option>
+          <option value="2">2 มื้อ/วัน</option>
+          <option value="3">3 มื้อ/วัน</option>
+        </select>
+        <span id="mealInfoBtn" style="cursor:pointer;color:#6b6b6b;font-size:15px;transition:color .2s;margin-left:2px" onclick="showMealPopup()" title="ดูรายละเอียดการหักค่าเบี้ยเลี้ยง">ⓘ</span>
       </div>
     </div>
   </div>
@@ -282,6 +312,11 @@ body {
       </div>
     </div>
 
+    <div id="mealDeduction" class="hidden" style="margin-top:12px;padding:12px 16px;background:#1f0f0a;border:1px solid #3a1a1a;border-radius:10px;display:flex;justify-content:space-between;align-items:center;font-size:14px">
+      <span style="color:#f87171">⛔ หักค่าอาหารที่โครงการจัดให้</span>
+      <span style="color:#f87171;font-weight:700"><span id="mealDeductionAmount">0</span> บาท</span>
+    </div>
+
     <div id="summaryText" style="margin-top:18px;padding:16px 20px;background:#1a1a1a;border-radius:10px;border:1px solid #2a2a2a;display:grid;gap:10px">
       <div style="display:flex;justify-content:space-between;align-items:center;font-size:15px">
         <span style="color:#a0a0a0">ระยะเดินทางรวม</span>
@@ -294,6 +329,14 @@ body {
       <div style="display:flex;justify-content:space-between;align-items:center;font-size:15px">
         <span style="color:#a0a0a0">รวมค่าเบี้ยเลี้ยงในการเดินทาง</span>
         <span style="color:#dc2626;font-weight:700"><span id="sTotalAllowance">0</span> บาท</span>
+      </div>
+      <div id="sMealRow" class="hidden" style="display:flex;justify-content:space-between;align-items:center;font-size:14px">
+        <span style="color:#f87171">หักค่าอาหารที่โครงการจัด</span>
+        <span style="color:#f87171;font-weight:600">-<span id="sMealDeduction">0</span> บาท</span>
+      </div>
+      <div id="sNetRow" class="hidden" style="display:flex;justify-content:space-between;align-items:center;font-size:15px;border-top:1px solid #2a2a2a;padding-top:8px">
+        <span style="color:#a0a0a0">รวมสุทธิหลังหัก</span>
+        <span style="color:#dc2626;font-weight:700"><span id="sNetAllowance">0</span> บาท</span>
       </div>
     </div>
 
@@ -328,6 +371,36 @@ body {
     </button>
   </div>
 
+  <!-- Modal -->
+  <div id="mealModal" class="modal-overlay hidden" onclick="closeMealPopup(event)">
+    <div class="modal">
+      <div class="modal-header">
+        <span>⚠️ ข้อควรระวัง — การหักค่าเบี้ยเลี้ยงเมื่อโครงการจัดอาหาร</span>
+        <span class="modal-close" onclick="closeMealPopup()">✕</span>
+      </div>
+      <div class="modal-body">
+        <p>ตามระเบียบกระทรวงการคลังว่าด้วยค่าใช้จ่ายในการฝึกอบรม การจัดงาน และการประชุมระหว่างประเทศ พ.ศ. 2549 (ฉบับที่ 3) พ.ศ. 2555 <strong>ข้อ 18</strong></p>
+        <p style="margin-top:12px">"ในกรณีที่ผู้จัดการฝึกอบรมจัดอาหารบางมื้อในระหว่างการฝึกอบรม <strong style="color:#f87171">ให้หักเบี้ยเลี้ยงเดินทางที่คำนวณได้ในอัตรามื้อละ 1 ใน 3 ของอัตราเบี้ยเลี้ยงเดินทางต่อวัน"</strong></p>
+        <div style="margin-top:16px;display:grid;gap:10px;background:#1a1a1a;border-radius:8px;padding:14px">
+          <div style="display:flex;justify-content:space-between;font-size:14px">
+            <span style="color:#a0a0a0">จัดอาหาร 1 มื้อ</span>
+            <span style="color:#f87171">หัก 1 ใน 3 (เหลือ 2 ใน 3)</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:14px">
+            <span style="color:#a0a0a0">จัดอาหาร 2 มื้อ</span>
+            <span style="color:#f87171">หัก 2 ใน 3 (เหลือ 1 ใน 3)</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:14px">
+            <span style="color:#a0a0a0">จัดอาหาร 3 มื้อ</span>
+            <span style="color:#f87171">งดจ่ายค่าเบี้ยเลี้ยง</span>
+          </div>
+        </div>
+        <p style="margin-top:14px;font-size:13px;color:#6b6b6b">หมายเหตุ: ค่าอาหารว่างและเครื่องดื่ม (เบรค) ไม่นำมาหักเบี้ยเลี้ยง เป็นค่าใช้จ่ายของโครงการโดยตรง</p>
+        <p style="margin-top:6px;font-size:13px;color:#6b6b6b">อ้างอิง: ระเบียบกระทรวงการคลังฯ ข้อ 18 วรรคสอง</p>
+      </div>
+    </div>
+  </div>
+
   <div class="footer">GO · ระบบคำนวณเบี้ยเลี้ยงเดินทางไปราชการ</div>
 </div>
 
@@ -346,6 +419,7 @@ function calculate() {
   const rate = parseInt(document.getElementById('rate').value)
   const accommodation = document.getElementById('accommodation').value
   const isBorrowing = document.getElementById('borrowing').value === 'yes'
+  const meals = parseInt(document.getElementById('meals').value)
 
   const depDay = parseInt(document.getElementById('depDay').value)
   const depMonth = parseInt(document.getElementById('depMonth').value)
@@ -379,6 +453,10 @@ function calculate() {
   if (eligibleDays < 0) eligibleDays = 0
 
   const totalAllowance = eligibleDays * rate
+  const deductionPerDay = Math.round(rate / 3) * meals
+  const totalDeduction = Math.round(eligibleDays * rate / 3) * meals
+  const netAllowance = Math.max(0, totalAllowance - totalDeduction)
+
   const totalHrsDec = fractional * 24
   const hrs = Math.floor(totalHrsDec)
   const mins = Math.round((totalHrsDec - hrs) * 60)
@@ -401,6 +479,20 @@ function calculate() {
   document.getElementById('sEligibleDays').textContent = displayEligible
   document.getElementById('sTotalAllowance').textContent = displayTotal
 
+  const hasMeals = meals > 0
+  const dedEl = document.getElementById('mealDeduction')
+  const sMealRow = document.getElementById('sMealRow')
+  const sNetRow = document.getElementById('sNetRow')
+  dedEl.classList.toggle('hidden', !hasMeals)
+  sMealRow.classList.toggle('hidden', !hasMeals)
+  sNetRow.classList.toggle('hidden', !hasMeals)
+
+  if (hasMeals) {
+    document.getElementById('mealDeductionAmount').textContent = totalDeduction.toLocaleString()
+    document.getElementById('sMealDeduction').textContent = totalDeduction.toLocaleString()
+    document.getElementById('sNetAllowance').textContent = netAllowance.toLocaleString()
+  }
+
   const bs = document.getElementById('borrowSection')
   bs.classList.toggle('hidden', !isBorrowing)
 
@@ -412,6 +504,16 @@ function calculate() {
 
     document.getElementById('refundAmount').textContent = refund.toLocaleString()
     document.getElementById('refundPercent').textContent = pct.toFixed(2)
+  }
+}
+
+function showMealPopup() {
+  document.getElementById('mealModal').classList.remove('hidden')
+}
+
+function closeMealPopup(e) {
+  if (!e || e.target === document.getElementById('mealModal')) {
+    document.getElementById('mealModal').classList.add('hidden')
   }
 }
 
