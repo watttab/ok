@@ -164,6 +164,16 @@ body {
 .calc-btn:active { transform: scale(.98); }
 .calc-btn .arrow { font-size: 20px; }
 
+/* Share */
+.share-btn {
+  flex:1; padding:11px 18px; border-radius:10px; border:1px solid #2a2a2a;
+  background:#1a1a1a; color:#ccc; font-size:14px; font-weight:500;
+  cursor:pointer; transition:all .25s; font-family:inherit; text-align:center;
+  min-width:140px;
+}
+.share-btn:hover { border-color:#dc2626; color:#fff; background:#1f0a0a; }
+.share-btn:active { transform:scale(.97); }
+
 /* Notes */
 .note { font-size: 12px; color: #4a4a4a; margin-top: 6px; text-align: center; }
 .hidden { display: none; }
@@ -469,6 +479,17 @@ body {
       <span>คำนวณ</span>
       <span class="arrow">→</span>
     </button>
+
+    <div id="shareSection" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid #222">
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="share-btn" onclick="copySummary(this)">
+          📋 คัดลอกสรุป
+        </button>
+        <button class="share-btn" onclick="shareLine()">
+          📱 แชร์ LINE
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- Multi-segment -->
@@ -654,6 +675,43 @@ function calculate() {
     document.getElementById('refundAmount').textContent = refund.toLocaleString()
     document.getElementById('refundPercent').textContent = pct.toFixed(2)
   }
+  document.getElementById('shareSection').style.display = 'block'
+}
+
+function buildSummary() {
+  const g = id => document.getElementById(id)
+  const v = id => g(id).textContent
+  const is = id => g(id).style.display !== 'none'
+  let t = `📋 สรุปค่าใช้จ่ายเดินทางไปราชการ\n`
+  t += `━━━━━━━━━━━━━━━━━━━━━━\n`
+  t += `ระยะเวลา: ${v('sTotalDays')} วัน ${v('sTotalHours')} ชม. ${v('sTotalMinutes')} น.\n`
+  t += `สิทธิ์เบิก: ${v('sEligibleDays')} วัน\n`
+  t += `เบี้ยเลี้ยง: ${v('sTotalAllowance')}\n`
+  if (is('sMealRow')) t += `หักอาหาร: -${v('sMealDeduction')}\n`
+  if (is('sAccommodationRow')) t += `ค่าที่พัก: ${v('sAccommodation')}\n`
+  if (is('sTransportRow')) t += `ค่าพาหนะ: ${v('sTransport')}\n`
+  if (is('sOtherRow')) t += `อื่นๆ: ${v('sOther')}\n`
+  if (is('sGrandTotalRow')) t += `━━━━━━━━━━━━━━━━━━━━━━\nรวมทั้งสิ้น: ${v('sGrandTotal')}\n`
+  return t
+}
+
+function copySummary(btn) {
+  const txt = buildSummary()
+  navigator.clipboard.writeText(txt).then(() => {
+    const orig = btn.textContent
+    btn.textContent = '✅ คัดลอกแล้ว!'
+    setTimeout(() => btn.textContent = orig, 1500)
+  }).catch(() => {
+    const ta = document.createElement('textarea')
+    ta.value = txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove()
+    const orig = btn.textContent; btn.textContent = '✅ คัดลอกแล้ว!'; setTimeout(() => btn.textContent = orig, 1500)
+  })
+}
+
+function shareLine() {
+  const txt = buildSummary()
+  const url = 'https://line.me/R/msg/text/?' + encodeURIComponent(txt)
+  window.open(url, '_blank')
 }
 
 document.getElementById('accommodation').addEventListener('change', function() {
