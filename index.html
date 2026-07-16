@@ -243,12 +243,10 @@ body {
         </select>
         <span id="mealInfoBtn" style="cursor:pointer;color:#6b6b6b;font-size:15px;transition:color .2s;margin-left:2px" title="ดูรายละเอียดการหักค่าเบี้ยเลี้ยง">ⓘ</span>
       </div>
-      <div class="pill" id="mealCountPill" style="display:none"><span class="key">#</span> จำนวนมื้อ
-        <select id="mealCount">
-          <option value="1">1 มื้อ/วัน</option>
-          <option value="2">2 มื้อ/วัน</option>
-          <option value="3">3 มื้อ/วัน</option>
-        </select>
+      <div class="pill" id="mealCountPill" style="display:none"><span class="key">#</span> จำนวนมื้อทั้งหมด
+        <input type="number" id="mealCount" value="1" min="0" max="30"
+          style="width:50px;background:transparent;border:none;color:#fff;font-size:13px;outline:none;font-family:inherit;text-align:center;appearance:textfield;-moz-appearance:textfield">
+        <span style="color:#6b6b6b;font-size:11px">มื้อ</span>
       </div>
     </div>
   </div>
@@ -516,8 +514,8 @@ function calculate() {
   if (eligibleDays < 0) eligibleDays = 0
 
   const totalAllowance = eligibleDays * rate
-  const deductionPerDay = Math.round(rate / 3) * meals
-  const totalDeduction = Math.round(eligibleDays * rate / 3) * meals
+  const deductionPerMeal = Math.round(rate / 3)
+  const totalDeduction = deductionPerMeal * meals
   const netAllowance = Math.max(0, totalAllowance - totalDeduction)
 
   const totalMinutes = Math.round(fractional * 24 * 60)
@@ -636,7 +634,7 @@ function calcSeg(s,r) {
   const diffDays=diffMs/864e5,w=Math.floor(diffDays),f=diffDays-w
   let e;if(f>.5)e=w+1;else if(f>.25)e=s.accommodation==='no'?w+.5:w;else e=w
   if(e<0)e=0
-  const al=e*r,ml=parseInt(s.meals),dc=ml>0?Math.round(e*r/3)*ml:0
+  const al=e*r,ml=parseInt(s.meals),dc=ml>0?Math.round(r/3)*ml:0
   const tm=Math.round(f*24*60)
   return{days:w,hours:Math.floor(tm/60),mins:tm%60,eligibleDays:e,allowance:al,deduction:dc,net:Math.max(0,al-dc)}
 }
@@ -718,12 +716,9 @@ function renderSegs() {
           </select>
         </div>
         <div class="pill" style="font-size:12px"><span class="key">🍽</span> อาหาร
-          <select class="si" data-id="${s.id}" data-f="meals" style="font-size:12px">
-            <option value="0"${s.meals===0?' selected':''}>ไม่จัด</option>
-            <option value="1"${s.meals===1?' selected':''}>1 มื้อ</option>
-            <option value="2"${s.meals===2?' selected':''}>2 มื้อ</option>
-            <option value="3"${s.meals===3?' selected':''}>3 มื้อ</option>
-          </select>
+          <input type="number" class="si" data-id="${s.id}" data-f="meals" value="${s.meals}" min="0" max="30"
+            style="width:46px;background:transparent;border:none;color:#fff;font-size:12px;outline:none;font-family:inherit;text-align:center;appearance:textfield;-moz-appearance:textfield">
+          <span style="color:#6b6b6b;font-size:10px">มื้อ</span>
         </div>
       </div>
       ${segResultHTML(s,r)}
