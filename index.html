@@ -458,9 +458,9 @@ function calculate() {
   const totalDeduction = Math.round(eligibleDays * rate / 3) * meals
   const netAllowance = Math.max(0, totalAllowance - totalDeduction)
 
-  const totalHrsDec = fractional * 24
-  const hrs = Math.floor(totalHrsDec)
-  const mins = Math.round((totalHrsDec - hrs) * 60)
+  const totalMinutes = Math.round(fractional * 24 * 60)
+  const hrs = Math.floor(totalMinutes / 60)
+  const mins = totalMinutes % 60
 
   const displayDays = wholeDays >= 0 ? wholeDays : 0
   const displayHrs = hrs >= 0 ? hrs : 0
