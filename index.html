@@ -372,7 +372,7 @@ body {
   </div>
 
   <!-- Modal -->
-  <div id="mealModal" class="modal-overlay hidden" onclick="closeMealPopup(event)">
+  <div id="mealModal" class="modal-overlay" onclick="if(event.target===this)closeMealPopup()">
     <div class="modal">
       <div class="modal-header">
         <span>⚠️ ข้อควรระวัง — การหักค่าเบี้ยเลี้ยงเมื่อโครงการจัดอาหาร</span>
@@ -511,10 +511,8 @@ function showMealPopup() {
   document.getElementById('mealModal').classList.remove('hidden')
 }
 
-function closeMealPopup(e) {
-  if (!e || e.target === document.getElementById('mealModal')) {
-    document.getElementById('mealModal').classList.add('hidden')
-  }
+function closeMealPopup() {
+  document.getElementById('mealModal').classList.add('hidden')
 }
 
 document.getElementById('borrowing').addEventListener('change', function() {
