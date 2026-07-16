@@ -360,9 +360,11 @@ body {
               <option value="no">ไม่ใช้</option>
               <option value="yes">ใช้</option>
             </select>
-            <div id="carKmRow" style="display:none;align-items:center;gap:6px">
-              <input type="number" id="carKm" placeholder="กม." min="0" style="width:72px;padding:8px 10px;border-radius:8px;border:1px solid #2a2a2a;background:#1a1a1a;color:#fff;font-size:13px;outline:none;font-family:inherit;text-align:center">
-              <span style="color:#6b6b6b;font-size:12px">× 4 =</span>
+              <div id="carKmRow" style="display:none;align-items:center;gap:6px;flex-wrap:wrap">
+              <input type="number" id="carKm" placeholder="กม." min="0" style="width:72px;padding:8px 10px;border-radius:8px;border:1px solid #2a2a2a;background:#1a1a1a;color:#fff;font-size:13px;outline:none;font-family:inherit;text-align:center" title="ระยะทางเที่ยวเดียว">
+              <span style="color:#6b6b6b;font-size:12px">× 4</span>
+              <span style="color:#6b6b6b;font-size:12px">× 2 (ไป-กลับ)</span>
+              <span style="color:#6b6b6b;font-size:12px">=</span>
               <span style="color:#f97316;font-weight:600;font-size:14px" id="carAmount">0</span>
               <span style="color:#6b6b6b;font-size:12px">บาท</span>
             </div>
@@ -644,7 +646,7 @@ function calculate() {
 
   const transportCost = parseFloat(document.getElementById('transportCost').value) || 0
   const carKm = parseFloat(document.getElementById('carKm').value) || 0
-  const carCost = carKm * 4
+  const carCost = carKm * 4 * 2
   const totalTransport = transportCost + carCost
   const hasTransport = totalTransport > 0
   document.getElementById('sTransportRow').style.display = hasTransport ? 'flex' : 'none'
@@ -727,7 +729,7 @@ document.getElementById('personalCar').addEventListener('change', function() {
 })
 document.getElementById('carKm').addEventListener('input', function() {
   const km = parseFloat(this.value) || 0
-  document.getElementById('carAmount').textContent = (km * 4).toLocaleString()
+  document.getElementById('carAmount').textContent = (km * 4 * 2).toLocaleString()
 })
 
 document.getElementById('borrowing').addEventListener('change', function() {
